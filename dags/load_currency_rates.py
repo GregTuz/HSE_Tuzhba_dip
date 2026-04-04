@@ -78,7 +78,7 @@ def load_currency_rates():
 
 		log.info("Получено курсов: ", len(result))
 		for r in result:
-			log.info(f"  {r['currency']}: {r['rate_to_rub']} ₽",)
+			log.info(f"  {r['currency']}: {r['rate_to_rub']} р",)
 
 		return result
 
@@ -100,7 +100,7 @@ def load_currency_rates():
 			rows,
 		)
 
-		log.info("Записано строк в currency_rates: %d", len(rows))
+		log.info("Записано строк ", len(rows))
 
 	@task
 	def verify_rates(**context) -> None:
@@ -122,7 +122,7 @@ def load_currency_rates():
 
 		log.info("Курсы за сегодня в ClickHouse:")
 		for dt, currency, rate in result:
-			log.info(f"  {currency}: {rate} ₽",)
+			log.info(f"  {currency}: {rate} р",)
 
 	rates = fetch_rates_from_cbr()
 	save_rates_to_clickhouse(rates) >> verify_rates()

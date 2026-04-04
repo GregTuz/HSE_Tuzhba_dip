@@ -38,6 +38,6 @@ def send_transaction(transaction: TransactionModel):
 
     return {
         "status": "ok",
-        "message": f"Транзакция {transaction.transaction_id} прошла валидацию и готова к отправке",
+        "message": f"Транзакция {transaction.transaction_id} прошла валидацию",
         "payload": payload,
     }
