@@ -72,6 +72,7 @@ services:
           --describe \
           --topic transactions.all,transactions.valid,transactions.invalid
 
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -91,6 +92,7 @@ services:
     ports:
       - "${CLICKHOUSE_PORT_HTTP}:8123"
       - "${CLICKHOUSE_PORT_NATIVE}:9000"
+
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/init:/docker-entrypoint-initdb.d
@@ -128,6 +130,7 @@ services:
       - POSTGRES_USER=${AIRFLOW_DB_USER}
       - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
       - POSTGRES_DB=${AIRFLOW_DB_NAME}
+
     networks: [data-network]
     volumes:
       - airflow_db_data:/var/lib/postgresql/data
@@ -143,6 +146,7 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
     networks: [data-network]
+
     depends_on:
       - airflow-db
     command: >
@@ -216,6 +220,7 @@ services:
         condition: service_healthy
       kafka-init:
         condition: service_completed_successfully
+
     restart: unless-stopped
     networks: [data-network]
 
