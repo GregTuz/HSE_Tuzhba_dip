@@ -61,8 +61,7 @@ services:
         /opt/kafka/bin/kafka-topics.sh \
           --bootstrap-server kafka:9092 \
           --describe \
-          --topic transactions.all,transactions.valid,transactions.invalid
-
+          --topic transactions.valid,transactions.invalid
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -83,11 +82,11 @@ services:
     ports:
       - "${CLICKHOUSE_PORT_HTTP}:8123"
       - "${CLICKHOUSE_PORT_NATIVE}:9000"
-
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/init:/docker-entrypoint-initdb.d
     networks: [data-network]
+
 
   superset:
     image: apache/superset:3.1.0
@@ -95,7 +94,8 @@ services:
     ports:
       - "${SUPERSET_PORT}:8088"
     depends_on:
-      - clickhouse
+      clickhouse:
+        condition: service_started
     environment:
       - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY}
     volumes:
@@ -121,10 +121,14 @@ services:
       - POSTGRES_USER=${AIRFLOW_DB_USER}
       - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
       - POSTGRES_DB=${AIRFLOW_DB_NAME}
-
     networks: [data-network]
     volumes:
       - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_DB_USER} -d ${AIRFLOW_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   airflow-init:
     build: .
@@ -137,9 +141,9 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
     networks: [data-network]
-
     depends_on:
-      - airflow-db
+      airflow-db:
+        condition: service_healthy
     command: >
       bash -c "
       airflow db migrate &&
@@ -162,7 +166,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
       clickhouse:
-        condition: service_healthy
+        condition: service_started
       kafka:
         condition: service_healthy
     ports:
@@ -184,7 +188,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
       clickhouse:
-        condition: service_healthy
+        condition: service_started
       kafka:
         condition: service_healthy
     command: airflow scheduler
@@ -217,7 +221,6 @@ services:
         condition: service_healthy
       kafka-init:
         condition: service_completed_successfully
-
     restart: unless-stopped
     networks: [data-network]
 
