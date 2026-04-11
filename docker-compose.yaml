@@ -42,15 +42,6 @@ services:
         /opt/kafka/bin/kafka-topics.sh \
           --bootstrap-server kafka:9092 \
           --create --if-not-exists \
-          --topic transactions.all \
-          --partitions 3 \
-          --replication-factor 1 \
-          --config retention.bytes=3221225472 \
-          --config segment.bytes=104857600
-
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:9092 \
-          --create --if-not-exists \
           --topic transactions.valid \
           --partitions 3 \
           --replication-factor 1 \
