@@ -23,8 +23,9 @@ def get_clickhouse_client() -> Client:
 @dag(
 	dag_id="load_currency_rates",
 	schedule="5 9 * * *",
-	start_date=datetime(2025, 1, 1),
-	catchup=True,
+	start_date=datetime(2015, 12, 31),
+	catchup=False,
+	max_active_runs=1,
 	params={
 		"logical_date": Param(
 			default=None,
@@ -67,7 +68,7 @@ def load_currency_rates():
 				continue
 
 			nominal = int(valute.find("Nominal").text)
-			value   = float(valute.find("Value").text.replace(",", "."))
+			value = float(valute.find("Value").text.replace(",", "."))
 
 			result.append({
 				"dt": dt,
@@ -104,25 +105,31 @@ def load_currency_rates():
 
 	@task
 	def verify_rates(**context) -> None:
-		logical_date = context["logical_date"].date()
+		dag_run = context["dag_run"]
+		conf = dag_run.conf or {}
+
+		if "logical_date" in conf:
+			logical_date = date.fromisoformat(conf["logical_date"])
+		else:
+			logical_date = context["data_interval_end"].date()
+
+		log.info(f"Проверяем за дату: {logical_date}")
 		client = get_clickhouse_client()
 
-		result = client.execute("""
-            SELECT
-                dt,
-                currency,
-                rate_to_rub
-            FROM currency_rates
-            WHERE dt = today()
-            ORDER BY currency
-        """, {"dt": logical_date})
+		result = client.execute(
+			"SELECT dt, currency, rate_to_rub "
+			"FROM currency_rates "
+			"WHERE dt = %(dt)s "
+			"ORDER BY currency",
+			{"dt": logical_date},
+		)
 
 		if not result:
-			raise ValueError("Сегоднящняя партиция пуста")
+			raise ValueError(f"Партиция за {logical_date} пуста")
 
 		log.info("Курсы за сегодня в ClickHouse:")
 		for dt, currency, rate in result:
-			log.info(f"  {currency}: {rate} р",)
+			log.info(f"  {currency}: {rate} р")
 
 	rates = fetch_rates_from_cbr()
 	save_rates_to_clickhouse(rates) >> verify_rates()

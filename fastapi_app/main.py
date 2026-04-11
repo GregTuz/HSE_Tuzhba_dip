@@ -138,7 +138,7 @@ def send_transaction(transaction: TransactionModel):
     return {
         "status": "ok",
         "message": f"Транзакция {transaction.transaction_id} отправлена в Kafka",
-        "topics": [settings.kafka_topic_all, settings.kafka_topic_valid],
+        "topics": settings.kafka_topic_valid,
     }
 
 
