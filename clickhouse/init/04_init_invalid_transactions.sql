@@ -11,8 +11,8 @@ SELECT
     transaction_type,
     merchant_category,
     country_code,
-    timestamp,
-    transaction_date,
+    parseDateTimeBestEffortOrNull(timestamp) AS timestamp,
+    toDateOrNull(transaction_date) AS transaction_date,
     now() AS ingested_at
 
 FROM kafka_transactions_invalid;

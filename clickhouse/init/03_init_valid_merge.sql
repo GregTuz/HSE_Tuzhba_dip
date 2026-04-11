@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS transactions_valid
     monthly_limit_rub Decimal(18, 2),
     amount            Decimal(18, 2),
     amount_rub        Float64,
-    amount_usd        Float64,
     account_balance   Decimal(18, 2),
     currency          String,
     transaction_type  String,

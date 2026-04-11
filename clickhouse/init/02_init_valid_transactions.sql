@@ -2,11 +2,11 @@ CREATE TABLE IF NOT EXISTS kafka_transactions_valid
 (
     transaction_id    Int64,
     account_id        Int64,
-    timestamp         DateTime,
+    timestamp         String,
     transaction_type  String,
     amount            Decimal(18, 2),
     account_balance   Decimal(18, 2),
-    transaction_date  Date,
+    transaction_date  String,
     merchant_category String,
     country_code      String,
     account_level     String,
