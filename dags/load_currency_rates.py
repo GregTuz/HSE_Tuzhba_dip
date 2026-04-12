@@ -24,7 +24,7 @@ def get_clickhouse_client() -> Client:
 	dag_id="load_currency_rates",
 	schedule="5 9 * * *",
 	start_date=datetime(2015, 12, 31),
-	catchup=False,
+	catchup=True,
 	max_active_runs=1,
 	params={
 		"logical_date": Param(
