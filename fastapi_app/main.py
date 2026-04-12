@@ -74,7 +74,7 @@ async def stream_loop():
     logger.info("Стрим запущен")
     try:
         while True:
-            count = random.randint(1, 2) # TODO 1..100
+            count = random.randint(1, 100)
             logger.info(f"Отправка {count} транзакций...")
 
             for _ in range(count):
