@@ -16,5 +16,5 @@ CREATE DICTIONARY IF NOT EXISTS dict_merchant_category
 )
 PRIMARY KEY category_code
 SOURCE(CLICKHOUSE(TABLE 'dict_merchant_category_source'))
-LAYOUT(FLAT())
+LAYOUT(COMPLEX_KEY_HASHED())
 LIFETIME(0);

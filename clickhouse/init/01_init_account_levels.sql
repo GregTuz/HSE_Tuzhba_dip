@@ -16,5 +16,5 @@ CREATE DICTIONARY IF NOT EXISTS dict_account_level
 )
 PRIMARY KEY level_code
 SOURCE(CLICKHOUSE(TABLE 'dict_account_level_source'))
-LAYOUT(FLAT())
+LAYOUT(COMPLEX_KEY_HASHED())
 LIFETIME(0);

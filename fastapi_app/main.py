@@ -47,10 +47,7 @@ def load_broken_transaction() -> dict:
     return broken_slice.sample(1).iloc[0].to_dict()
 
 
-def send_to_kafka(transaction: TransactionModel, is_valid: bool):
-    payload = transaction.model_dump_json().encode("utf-8")
-    key = str(transaction.account_id).encode("utf-8")
-
+def send_to_kafka(payload: bytes, key: bytes, is_valid: bool):
     topic = settings.kafka_topic_valid if is_valid else settings.kafka_topic_invalid
     producer.produce(
         topic=topic,
@@ -62,13 +59,15 @@ def send_to_kafka(transaction: TransactionModel, is_valid: bool):
     producer.poll(0)
 
 
-def validate_transaction(data: dict) -> tuple[TransactionModel | None, bool]:
+def validate_transaction(data: dict) -> tuple[bytes, bytes, bool]:
+    key = str(data.get("account_id", "unknown")).encode("utf-8")
     try:
         transaction = TransactionModel(**data)
-        return transaction, True
+        payload = transaction.model_dump_json().encode("utf-8")
+        return payload, key, True
     except ValidationError:
-        transaction = TransactionModel.model_construct(**data)
-        return transaction, False
+        payload = json.dumps(data, default=str).encode("utf-8")
+        return payload, key, False
 
 
 async def stream_loop():
@@ -80,8 +79,8 @@ async def stream_loop():
 
             for _ in range(count):
                 data = load_random_transaction()
-                transaction, is_valid = validate_transaction(data)
-                send_to_kafka(transaction, is_valid)
+                payload, key, is_valid = validate_transaction(data)
+                send_to_kafka(payload, key, is_valid)
 
             producer.flush(timeout=5)
             await asyncio.sleep(1)
@@ -130,7 +129,9 @@ def get_broken_transaction():
 )
 def send_transaction(transaction: TransactionModel):
     try:
-        send_to_kafka(transaction, is_valid=True)
+        payload = transaction.model_dump_json().encode("utf-8")
+        key = str(transaction.account_id).encode("utf-8")
+        send_to_kafka(payload, key, is_valid=True)
         producer.flush(timeout=5)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка отправки в Kafka: {e}")

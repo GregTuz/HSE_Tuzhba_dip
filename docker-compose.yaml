@@ -85,6 +85,7 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/init:/docker-entrypoint-initdb.d
+      - ./clickhouse/config:/etc/clickhouse-server/users.d
     networks: [data-network]
 
 

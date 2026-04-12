@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 CURRENCIES = ["USD", "EUR", "RUB", "GBP"]
@@ -17,6 +17,8 @@ class CurrencyEnum(str, Enum):
 
 
 class TransactionModel(BaseModel):
+    model_config = ConfigDict(json_encoders={Decimal: float})
+
     transaction_id: int
     account_id: int
     timestamp: datetime
