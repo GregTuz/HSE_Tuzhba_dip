@@ -88,7 +88,6 @@ services:
       - ./clickhouse/config:/etc/clickhouse-server/users.d
     networks: [data-network]
 
-
   superset:
     image: apache/superset:3.1.0
     container_name: superset
@@ -104,6 +103,7 @@ services:
     networks: [data-network]
     command: >
       bash -c "
+      pip install clickhouse-connect &&
       superset db upgrade &&
       superset fab create-admin --username ${SUPERSET_ADMIN_USERNAME} --firstname Admin --lastname Admin --email ${SUPERSET_ADMIN_EMAIL} --password ${SUPERSET_ADMIN_PASSWORD} || true &&
       superset init &&
