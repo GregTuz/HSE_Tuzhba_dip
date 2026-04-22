@@ -1,0 +1,7 @@
+<clickhouse>
+    <profiles>
+        <default>
+            <max_partitions_per_insert_block>500</max_partitions_per_insert_block>
+        </default>
+    </profiles>
+</clickhouse>

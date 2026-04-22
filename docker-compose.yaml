@@ -42,15 +42,6 @@ services:
         /opt/kafka/bin/kafka-topics.sh \
           --bootstrap-server kafka:9092 \
           --create --if-not-exists \
-          --topic transactions.all \
-          --partitions 3 \
-          --replication-factor 1 \
-          --config retention.bytes=3221225472 \
-          --config segment.bytes=104857600
-
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:9092 \
-          --create --if-not-exists \
           --topic transactions.valid \
           --partitions 3 \
           --replication-factor 1 \
@@ -70,8 +61,7 @@ services:
         /opt/kafka/bin/kafka-topics.sh \
           --bootstrap-server kafka:9092 \
           --describe \
-          --topic transactions.all,transactions.valid,transactions.invalid
-
+          --topic transactions.valid,transactions.invalid
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -92,10 +82,10 @@ services:
     ports:
       - "${CLICKHOUSE_PORT_HTTP}:8123"
       - "${CLICKHOUSE_PORT_NATIVE}:9000"
-
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./clickhouse/init:/docker-entrypoint-initdb.d
+      - ./clickhouse/config:/etc/clickhouse-server/users.d
     networks: [data-network]
 
   superset:
@@ -104,7 +94,8 @@ services:
     ports:
       - "${SUPERSET_PORT}:8088"
     depends_on:
-      - clickhouse
+      clickhouse:
+        condition: service_started
     environment:
       - SUPERSET_SECRET_KEY=${SUPERSET_SECRET_KEY}
     volumes:
@@ -112,13 +103,9 @@ services:
     networks: [data-network]
     command: >
       bash -c "
+      pip install clickhouse-connect &&
       superset db upgrade &&
-      superset fab create-admin
-        --username ${SUPERSET_ADMIN_USERNAME}
-        --firstname Admin
-        --lastname Admin
-        --email ${SUPERSET_ADMIN_EMAIL}
-        --password ${SUPERSET_ADMIN_PASSWORD} || true &&
+      superset fab create-admin --username ${SUPERSET_ADMIN_USERNAME} --firstname Admin --lastname Admin --email ${SUPERSET_ADMIN_EMAIL} --password ${SUPERSET_ADMIN_PASSWORD} || true &&
       superset init &&
       superset run -p 8088 --host 0.0.0.0
       "
@@ -130,10 +117,14 @@ services:
       - POSTGRES_USER=${AIRFLOW_DB_USER}
       - POSTGRES_PASSWORD=${AIRFLOW_DB_PASSWORD}
       - POSTGRES_DB=${AIRFLOW_DB_NAME}
-
     networks: [data-network]
     volumes:
       - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AIRFLOW_DB_USER} -d ${AIRFLOW_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   airflow-init:
     build: .
@@ -146,9 +137,9 @@ services:
     volumes:
       - ./dags:/opt/airflow/dags
     networks: [data-network]
-
     depends_on:
-      - airflow-db
+      airflow-db:
+        condition: service_healthy
     command: >
       bash -c "
       airflow db migrate &&
@@ -168,9 +159,12 @@ services:
       - ./dags:/opt/airflow/dags
     networks: [data-network]
     depends_on:
-      - airflow-init
-      - clickhouse
-      - kafka
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     ports:
       - "${AIRFLOW_PORT}:8080"
     command: airflow webserver
@@ -187,9 +181,12 @@ services:
       - ./dags:/opt/airflow/dags
     networks: [data-network]
     depends_on:
-      - airflow-init
-      - clickhouse
-      - kafka
+      airflow-init:
+        condition: service_completed_successfully
+      clickhouse:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     command: airflow scheduler
 
   jupyter:
@@ -220,7 +217,6 @@ services:
         condition: service_healthy
       kafka-init:
         condition: service_completed_successfully
-
     restart: unless-stopped
     networks: [data-network]
 
