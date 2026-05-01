@@ -20,5 +20,5 @@ SETTINGS
     kafka_format = 'JSONEachRow',
     kafka_num_consumers = 1,
     kafka_max_block_size = 10000,
-    kafka_poll_timeout_ms = 300000,
-    kafka_flush_interval_ms = 300000;
+    kafka_poll_timeout_ms = 10000,
+    kafka_flush_interval_ms = 10000;
