@@ -74,7 +74,7 @@ async def stream_loop():
     logger.info("Стрим запущен")
     try:
         while True:
-            count = random.randint(1, 100)
+            count = random.randint(1, 500)
             logger.info(f"Отправка {count} транзакций...")
 
             for _ in range(count):
@@ -154,7 +154,7 @@ async def start_stream():
         raise HTTPException(status_code=400, detail="Стрим уже запущен")
 
     stream_task = asyncio.create_task(stream_loop())
-    return {"status": "started", "message": "Стрим запущен. 1-100 транзакций каждую секунду."}
+    return {"status": "started", "message": "Стрим запущен. 1-500 транзакций каждую секунду."}
 
 
 @app.post(
