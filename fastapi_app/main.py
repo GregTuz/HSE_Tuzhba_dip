@@ -82,7 +82,7 @@ async def stream_loop():
                 payload, key, is_valid = validate_transaction(data)
                 send_to_kafka(payload, key, is_valid)
 
-            producer.flush(timeout=5)
+            producer.flush(timeout=3)
             await asyncio.sleep(1)
     except asyncio.CancelledError:
         logger.info("Стрим остановлен")
