@@ -19,15 +19,19 @@ def get_clickhouse_client() -> Client:
 	dag_id="dm_daily_limits",
 	schedule="0 1 * * *",
 	start_date=datetime(2015, 12, 31),
-	catchup=False,
-	max_active_runs=5,
+	catchup=True,
+	max_active_runs=50,
 	tags=["mart", "limits"],
 )
 def dm_daily_limits():
 
 	@task
 	def compute(**context) -> None:
+		print(f"CONTEXT KEYS: {list(context.keys())}")
+		print(f"data_interval_end: {context.get('data_interval_end')}")
+		print(f"data_interval_start: {context.get('data_interval_start')}")
 		dt: date = context["data_interval_end"].date() - timedelta(days=1)
+		print(f"DT = {dt}")
 		log.info(f"Считаем дневные лимиты за: {dt}")
 
 		client = get_clickhouse_client()

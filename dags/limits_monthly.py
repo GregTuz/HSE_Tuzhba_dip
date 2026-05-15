@@ -20,7 +20,7 @@ def get_clickhouse_client() -> Client:
 	dag_id="dm_monthly_limits",
 	schedule="0 1 2 * *",
 	start_date=datetime(2015, 12, 31),
-	catchup=False,
+	catchup=True,
 	max_active_runs=5,
 	tags=["mart", "limits"],
 )
@@ -29,8 +29,13 @@ def dm_monthly_limits():
 	@task
 	def compute(**context) -> None:
 		run_date: date = context["data_interval_end"].date()
-		month_start: date = (run_date - relativedelta(months=1)).replace(day=1)
 		month_end: date = run_date.replace(day=1)
+		month_start: date = (month_end - relativedelta(months=1))
+
+		log.info(f"data_interval_end: {context['data_interval_end']}")
+		log.info(f"run_date: {run_date}")
+		log.info(f"month_end: {month_end}")
+		log.info(f"month_start: {month_start}")
 
 		log.info(f"Ищем подозрительные аккаунты за: {month_start} — {month_end}")
 
