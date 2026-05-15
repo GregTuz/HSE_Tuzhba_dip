@@ -19,8 +19,8 @@ def get_clickhouse_client() -> Client:
 	dag_id="dm_analytics_daily",
 	schedule="0 1 * * *",
 	start_date=datetime(2016, 1, 2),
-	catchup=False,
-	max_active_runs=10,
+	catchup=True,
+	max_active_runs=50,
 	tags=["mart", "analytics"],
 )
 def dm_analytics_daily():
