@@ -212,6 +212,8 @@ services:
     env_file: .env
     volumes:
       - ./notebooks/Financial_Transactions_Enriched.csv:/app/data/Financial_Transactions_Enriched.csv:ro
+      - ./notebooks/Financial_Transactions_3M.csv:/app/data/Financial_Transactions_3M.csv:ro
+      - ./notebooks/Financial_Transactions_3M.csv:/app/data/Financial_Transactions_15M.csv:ro
     depends_on:
       kafka:
         condition: service_healthy

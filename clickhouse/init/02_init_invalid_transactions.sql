@@ -21,4 +21,4 @@ SETTINGS
     kafka_num_consumers = 1,
     kafka_max_block_size = 10000,
     kafka_poll_timeout_ms = 3000,
-    kafka_flush_interval_ms = 3000;
+    kafka_flush_interval_ms = 500;
