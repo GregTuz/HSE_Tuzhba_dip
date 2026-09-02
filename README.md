@@ -14,7 +14,7 @@
 - **Антифрод** — обнаружение подозрительных паттернов: дробление переводов, превышение лимитов, аномальные снятия наличных
 - **Бизнес-аналитика** — оборот по категориям мерчантов, географии, уровням аккаунтов и временным паттернам
 
-**Датасет:** ~37 500 финансовых транзакций за 2016–2025 годы с полями `transaction_id`, `account_id`, `timestamp`, `amount`, `currency`, `merchant_category`, `country_code`, `account_level` и др. Датасет обогащён дополнительными атрибутами (категория мерчанта, страна, уровень аккаунта, валюта) из открытого источника [Kaggle](https://www.kaggle.com/datasets/mdhossanr/financial-transactions-dataset-for-analysis).
+**Датасет:** ~3 000 000 финансовых транзакций за 2016–2025 годы с полями `transaction_id`, `account_id`, `timestamp`, `amount`, `currency`, `merchant_category`, `country_code`, `account_level` и др. Датасет обогащён дополнительными атрибутами (категория мерчанта, страна, уровень аккаунта, валюта) из открытого источника [Kaggle](https://www.kaggle.com/datasets/mdhossanr/financial-transactions-dataset-for-analysis).
 
 **Производительность:** задержка обработки ~3 секунды при интенсивности 500 транзакций/сек.
 
